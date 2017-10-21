@@ -8,7 +8,7 @@ class TimeStampedModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        abstract=True
+        abstract = True
 
 
 class Image(TimeStampedModel):
@@ -39,4 +39,3 @@ class Like(TimeStampedModel):
 
     def __str__(self):
         return 'User: {} - Image Caption: {}'.format(self.creator.username, self.image.caption)
-

@@ -21,4 +21,3 @@ class CommentAdmin(admin.ModelAdmin):
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):
     list_display = ['creator', 'image', 'created_at', 'updated_at']
-
