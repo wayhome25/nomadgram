@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from nomadgram.images.models import Image
 from nomadgram.images.models import Like
+from nomadgram.images.serializers import CommentSerializer
 from nomadgram.images.serializers import ImageSerializer
 
 
@@ -36,3 +37,18 @@ class LikeImage(APIView):
             Like.objects.create(creator=user, image=image)  # NOTE(다른방법): image.likes.create(creator=user)
 
         return Response(status=status.HTTP_201_CREATED)
+
+
+class CommentOnImage(APIView):
+
+    def post(self, request, image_id, format=None):
+        user = request.user
+        image = get_object_or_404(Image, id=image_id)
+
+        serializer = CommentSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(creator=user, image=image)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
