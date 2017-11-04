@@ -4,7 +4,6 @@ from nomadgram.images import views
 
 # url : /images/, namespace : images
 urlpatterns = [
-    url(r'^all/$', views.ListAllImages.as_view(), name='all_images'),
-    url(r'^comments/$', views.ListAllComments.as_view(), name='all_comments'),
-    url(r'^likes/$', views.ListAllLikes.as_view(), name='all_likes'),
+    url(r'^$', views.Feed.as_view(), name='feed'),
+    url(r'^(?P<image_id>\d+)/like/$', views.LikeImage.as_view(), name='like'),
 ]

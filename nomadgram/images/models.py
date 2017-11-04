@@ -18,6 +18,13 @@ class Image(TimeStampedModel):
     caption = models.TextField("caption", blank=True)
     creator = models.ForeignKey(User)
 
+    @property
+    def like_count(self):
+        return self.likes.count()
+
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         return '{} - {}'.format(self.location, self.caption)
 
