@@ -5,16 +5,7 @@ from nomadgram.images.models import Image
 from nomadgram.images.models import Like
 
 
-class ImageSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Image
-        fields = '__all__'
-
-
 class CommentSerializer(serializers.ModelSerializer):
-
-    image = ImageSerializer()
 
     class Meta:
         model = Comment
@@ -23,8 +14,16 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class LikeSerializer(serializers.ModelSerializer):
 
-    image = ImageSerializer()
-
     class Meta:
         model = Like
         fields = '__all__'
+
+
+class ImageSerializer(serializers.ModelSerializer):
+
+    comments = CommentSerializer(many=True)
+    likes = LikeSerializer(many=True)
+
+    class Meta:
+        model = Image
+        fields = ('id', 'file', 'location', 'caption', 'comments', 'likes')
