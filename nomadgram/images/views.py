@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
+from nomadgram.images.models import Comment
 from nomadgram.images.models import Image
 from nomadgram.images.models import Like
 from nomadgram.images.serializers import CommentSerializer
@@ -52,3 +53,12 @@ class CommentOnImage(APIView):
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentView(APIView):
+
+    def delete(self, request, comment_id, format=None):
+        user = request.user
+        comment = get_object_or_404(Comment, id=comment_id, creator=user)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
