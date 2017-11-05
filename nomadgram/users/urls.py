@@ -11,5 +11,3 @@ urlpatterns = [
     url('^(?P<username>\w+)/followers/$', views.UserFollowers.as_view(), name='user_followers'),
     url('^(?P<username>\w+)/following/$', views.UserFollowing.as_view(), name='user_following')
 ]
-
-# /users/12/follow/

@@ -9,6 +9,7 @@ from nomadgram.images.models import Comment
 from nomadgram.images.models import Image
 from nomadgram.images.models import Like
 from nomadgram.images.serializers import CommentSerializer
+from nomadgram.images.serializers import CountImageSerializer
 from nomadgram.images.serializers import ImageSerializer
 
 
@@ -75,3 +76,16 @@ class CommentView(APIView):
         comment = get_object_or_404(Comment, id=comment_id, creator=user)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class Search(APIView):
+
+    def get(self, request, format=None):
+        tags = request.query_params.get('tags', None)  # NOTE: query_params 를 통해서 query string을 가져온다.
+        if tags:
+            tags = tags.split(',')
+            images = Image.objects.filter(tags__name__in=tags).distinct()
+            serializer = CountImageSerializer(images, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_204_NO_CONTENT)

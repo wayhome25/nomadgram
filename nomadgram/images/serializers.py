@@ -6,7 +6,7 @@ from nomadgram.images.models import Like
 from nomadgram.users.models import User
 
 
-class UserProfileImageSerializer(serializers.ModelSerializer):
+class CountImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Image
@@ -43,4 +43,4 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Image
-        fields = ('id', 'creator', 'file', 'location', 'caption', 'comments', 'like_count')
+        fields = ('id', 'creator', 'file', 'location', 'caption', 'comments', 'like_count', 'tags')
