@@ -25,7 +25,22 @@ class Feed(APIView):
 
 class LikeImage(APIView):
 
-    def get(self, request, image_id, format=None):
+    def post(self, request, image_id, format=None):
+        user = request.user
+        image = get_object_or_404(Image, id=image_id)
+
+        try:
+            Like.objects.get(creator=user, image=image)
+            return Response(status=status.HTTP_304_NOT_MODIFIED)
+
+        except Like.DoesNotExist:
+            Like.objects.create(creator=user, image=image)  # NOTE(다른방법): image.likes.create(creator=user)
+            return Response(status=status.HTTP_201_CREATED)
+
+
+class UnLikeImage(APIView):
+
+    def delete(self, request, image_id, format=None):
         user = request.user
         image = get_object_or_404(Image, id=image_id)
 
@@ -35,9 +50,7 @@ class LikeImage(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         except Like.DoesNotExist:
-            Like.objects.create(creator=user, image=image)  # NOTE(다른방법): image.likes.create(creator=user)
-
-        return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_304_NOT_MODIFIED)
 
 
 class CommentOnImage(APIView):

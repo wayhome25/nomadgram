@@ -16,11 +16,15 @@ class Image(TimeStampedModel):
     file = models.ImageField("photo")
     location = models.TextField("location", blank=True)
     caption = models.TextField("caption", blank=True)
-    creator = models.ForeignKey(User)
+    creator = models.ForeignKey(User, related_name='images')
 
     @property
     def like_count(self):
         return self.likes.count()
+
+    @property
+    def comment_count(self):
+        return self.comments.count()
 
     class Meta:
         ordering = ['-created_at']
