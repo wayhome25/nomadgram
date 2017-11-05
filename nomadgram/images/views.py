@@ -17,7 +17,7 @@ class Feed(APIView):
     def get(self, request, format=None):
         user = request.user
         following_users = user.following.all()
-        feed_images = Image.objects.filter(Q(creator__in=following_users) | Q(creator=user))[:2]
+        feed_images = Image.objects.filter(Q(creator__in=following_users) | Q(creator=user))[:3]
         serializer = ImageSerializer(feed_images, many=True)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)

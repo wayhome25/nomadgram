@@ -14,7 +14,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                   'followers_count', 'following_count', 'images']
 
 
-class ExploreUserSerializer(serializers.ModelSerializer):
+class ListUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
