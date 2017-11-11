@@ -6,6 +6,14 @@ from nomadgram.images.models import Like
 from nomadgram.users.models import User
 
 
+class SmallImageSerializer(serializers.ModelSerializer):
+    """Used for the notifications"""
+
+    class Meta:
+        model = Image
+        fields = ['file']
+
+
 class CountImageSerializer(serializers.ModelSerializer):
 
     class Meta:

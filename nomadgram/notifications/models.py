@@ -1,5 +1,6 @@
 from django.db import models
 
+from nomadgram.images.models import Comment
 from nomadgram.images.models import Image
 from nomadgram.images.models import TimeStampedModel
 from nomadgram.users.models import User
@@ -17,3 +18,4 @@ class Notification(TimeStampedModel):
     to = models.ForeignKey(User, related_name='to')
     notificaiton_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     image = models.ForeignKey(Image, null=True, blank=True)
+    comment = models.ForeignKey(Comment, null=True, blank=True)
