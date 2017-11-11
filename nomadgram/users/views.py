@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 
 from django.shortcuts import get_object_or_404
 
+from nomadgram.notifications.models import Notification
 from nomadgram.users.models import User
 from nomadgram.users.serializer import ListUserSerializer
 from nomadgram.users.serializer import UserProfileSerializer
@@ -24,6 +25,8 @@ class FollowUser(APIView):
         user = request.user
         user_to_follow = get_object_or_404(User, id=user_id)
         user.following.add(user_to_follow)
+
+        Notification.objects.create(creator=user, to=user_to_follow, notificaiton_type='follow')
 
         return Response(status=status.HTTP_200_OK)
 

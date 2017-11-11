@@ -11,6 +11,7 @@ from nomadgram.images.models import Like
 from nomadgram.images.serializers import CommentSerializer
 from nomadgram.images.serializers import CountImageSerializer
 from nomadgram.images.serializers import ImageSerializer
+from nomadgram.notifications.models import Notification
 
 
 class Feed(APIView):
@@ -36,6 +37,7 @@ class LikeImage(APIView):
 
         except Like.DoesNotExist:
             Like.objects.create(creator=user, image=image)  # NOTE(다른방법): image.likes.create(creator=user)
+            Notification.objects.create(creator=user, to=image.creator, notificaiton_type='like', image=image)
             return Response(status=status.HTTP_201_CREATED)
 
 
@@ -63,7 +65,9 @@ class CommentOnImage(APIView):
         serializer = CommentSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save(creator=user, image=image)
+            comment = serializer.save(creator=user, image=image)  # NOTE: serializer.save() 는 모델 인스턴스를 리턴
+            Notification.objects.create(creator=user, to=image.creator, notificaiton_type='comment', image=image,
+                                        comment=comment)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
