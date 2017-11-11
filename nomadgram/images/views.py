@@ -82,6 +82,14 @@ class CommentView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ModerateComments(APIView):
+
+    def delete(self, request, image_id, comment_id):
+        comment = get_object_or_404(Comment, id=comment_id, image_id=image_id, image__creatorgs=request.user)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class Search(APIView):
 
     def get(self, request, format=None):
