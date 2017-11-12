@@ -25,6 +25,15 @@ class Feed(APIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
+class ImageDetail(APIView):
+
+    def get(self, request, image_id, format=None):
+        image = get_object_or_404(Image, id=image_id)
+        serializer = ImageSerializer(image)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
 class LikeImage(APIView):
 
     def post(self, request, image_id, format=None):
