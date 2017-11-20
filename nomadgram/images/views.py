@@ -11,6 +11,7 @@ from nomadgram.images.models import Like
 from nomadgram.images.serializers import CommentSerializer
 from nomadgram.images.serializers import CountImageSerializer
 from nomadgram.images.serializers import ImageSerializer
+from nomadgram.images.serializers import InputImageSerializer
 from nomadgram.notifications.models import Notification
 from nomadgram.users.models import User
 from nomadgram.users.serializer import ListUserSerializer
@@ -34,6 +35,22 @@ class ImageDetail(APIView):
         serializer = ImageSerializer(image)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, image_id, format=None):
+        user = request.user
+
+        try:
+            image = Image.objects.get(id=image_id, creator=user)
+        except Image.DoesNotExist:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = InputImageSerializer(image, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save(creator=user)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(data=serializer.erros, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LikeImage(APIView):
