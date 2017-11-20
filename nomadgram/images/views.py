@@ -12,6 +12,8 @@ from nomadgram.images.serializers import CommentSerializer
 from nomadgram.images.serializers import CountImageSerializer
 from nomadgram.images.serializers import ImageSerializer
 from nomadgram.notifications.models import Notification
+from nomadgram.users.models import User
+from nomadgram.users.serializer import ListUserSerializer
 
 
 class Feed(APIView):
@@ -36,7 +38,17 @@ class ImageDetail(APIView):
 
 class LikeImage(APIView):
 
+    def get(self, request, image_id, format=None):
+        """like 유저 리스트를 가져온다"""
+        likes = Like.objects.filter(image_id=image_id)
+        likes_creator_ids = likes.values('creator_id')
+        like_users = User.objects.filter(id__in=likes_creator_ids)
+
+        serializer = ListUserSerializer(like_users, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
     def post(self, request, image_id, format=None):
+        """like를 추가한다"""
         user = request.user
         image = get_object_or_404(Image, id=image_id)
 
