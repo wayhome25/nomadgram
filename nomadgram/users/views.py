@@ -49,6 +49,19 @@ class UserProfile(APIView):
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
+    def put(self, request, username, format=None):
+        try:
+            user = User.objects.get(id=request.user.id, username=username)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            serializer = UserProfileSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(data=serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(data=serializer.errors, status=status.HTTP_304_NOT_MODIFIED)
+
 
 class UserFollowers(APIView):
 

@@ -7,6 +7,9 @@ from nomadgram.users.models import User
 class UserProfileSerializer(serializers.ModelSerializer):
 
     images = CountImageSerializer(many=True)
+    post_count = serializers.ReadOnlyField()
+    followers_count = serializers.ReadOnlyField()
+    following_count = serializers.ReadOnlyField()
 
     class Meta:
         model = User
