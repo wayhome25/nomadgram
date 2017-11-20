@@ -30,6 +30,13 @@ class Feed(APIView):
 
 class ImageDetail(APIView):
 
+    def find_own_image(self, image_id, user):
+        try:
+            image = Image.objects.get(id=image_id, creator=user)
+            return image
+        except Image.DoesNotExist:
+            return None
+
     def get(self, request, image_id, format=None):
         image = get_object_or_404(Image, id=image_id)
         serializer = ImageSerializer(image)
@@ -38,19 +45,26 @@ class ImageDetail(APIView):
 
     def put(self, request, image_id, format=None):
         user = request.user
+        image = self.find_own_image(image_id, user)
+        if image:
+            serializer = InputImageSerializer(image, data=request.data, partial=True)
 
-        try:
-            image = Image.objects.get(id=image_id, creator=user)
-        except Image.DoesNotExist:
+            if serializer.is_valid():
+                serializer.save(creator=user)
+                return Response(data=serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(data=serializer.erros, status=status.HTTP_400_BAD_REQUEST)
+        else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        serializer = InputImageSerializer(image, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save(creator=user)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+    def delete(self, request, image_id, format=None):
+        user = request.user
+        image = self.find_own_image(image_id, user)
+        if image:
+            image.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         else:
-            return Response(data=serializer.erros, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class LikeImage(APIView):
