@@ -11,4 +11,5 @@ urlpatterns = [
     url('^(?P<username>\w+)/$', views.UserProfile.as_view(), name='user_profile'),
     url('^(?P<username>\w+)/followers/$', views.UserFollowers.as_view(), name='user_followers'),
     url('^(?P<username>\w+)/following/$', views.UserFollowing.as_view(), name='user_following'),
+    url('^(?P<username>\w+)/password/$', views.ChangePassword.as_view(), name='change_password'),
 ]
