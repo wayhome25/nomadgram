@@ -17,7 +17,7 @@ from nomadgram.users.models import User
 from nomadgram.users.serializer import ListUserSerializer
 
 
-class Feed(APIView):
+class Images(APIView):
 
     def get(self, request, format=None):
         user = request.user
@@ -26,6 +26,15 @@ class Feed(APIView):
         serializer = ImageSerializer(feed_images, many=True)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        user = request.user
+        serializer = InputImageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(creator=user)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ImageDetail(APIView):
