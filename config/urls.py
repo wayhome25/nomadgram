@@ -8,6 +8,8 @@ from django.contrib import admin
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 
+from nomadgram import views
+
 urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     url(settings.ADMIN_URL, admin.site.urls),
@@ -19,9 +21,9 @@ urlpatterns = [
     url(r'^rest-auth/', include('rest_auth.urls')),
     url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
     url(r'^users/', include('nomadgram.users.urls', namespace='users')),
-    url(r'images/', include('nomadgram.images.urls', namespace='images')),
-    url(r'notifications/', include('nomadgram.notifications.urls', namespace='notifications'))
-
+    url(r'^images/', include('nomadgram.images.urls', namespace='images')),
+    url(r'^notifications/', include('nomadgram.notifications.urls', namespace='notifications')),
+    url(r'^', views.ReactAppView.as_view()),  # catch all URL
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
