@@ -1,7 +1,6 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from silk.profiling.profiler import silk_profile
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -20,16 +19,16 @@ from nomadgram.users.serializer import ListUserSerializer
 
 class Images(APIView):
 
-    @silk_profile(name='View Image List')
-    def get(self, request, format=None):
+    def get(self, request):
         user = request.user
         following_users = user.following.all()
         feed_images = Image.objects.filter(Q(creator__in=following_users) | Q(creator=user))[:3]
-        serializer = ImageSerializer(feed_images, many=True)
+        query = feed_images.select_related('creator').prefetch_related('comments__creator', 'tags', 'likes')
+        serializer = ImageSerializer(query, many=True)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, format=None):
+    def post(self, request):
         user = request.user
         serializer = InputImageSerializer(data=request.data)
         if serializer.is_valid():
@@ -48,15 +47,13 @@ class ImageDetail(APIView):
         except Image.DoesNotExist:
             return None
 
-    @silk_profile(name='View Image List')
-    def get(self, request, image_id, format=None):
+    def get(self, request, image_id):
         image = get_object_or_404(Image, id=image_id)
         serializer = ImageSerializer(image)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @silk_profile(name='View Image List')
-    def put(self, request, image_id, format=None):
+    def put(self, request, image_id):
         user = request.user
         image = self.find_own_image(image_id, user)
         if image:
@@ -70,7 +67,7 @@ class ImageDetail(APIView):
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-    def delete(self, request, image_id, format=None):
+    def delete(self, request, image_id):
         user = request.user
         image = self.find_own_image(image_id, user)
         if image:
@@ -82,8 +79,7 @@ class ImageDetail(APIView):
 
 class LikeImage(APIView):
 
-    @silk_profile(name='View Image List')
-    def get(self, request, image_id, format=None):
+    def get(self, request, image_id):
         """like 유저 리스트를 가져온다"""
         likes = Like.objects.filter(image_id=image_id)
         likes_creator_ids = likes.values('creator_id')
@@ -92,7 +88,7 @@ class LikeImage(APIView):
         serializer = ListUserSerializer(like_users, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, image_id, format=None):
+    def post(self, request, image_id):
         """like를 추가한다"""
         user = request.user
         image = get_object_or_404(Image, id=image_id)
@@ -103,13 +99,14 @@ class LikeImage(APIView):
 
         except Like.DoesNotExist:
             Like.objects.create(creator=user, image=image)  # NOTE(다른방법): image.likes.create(creator=user)
-            Notification.objects.create(creator=user, to=image.creator, notificaiton_type='like', image=image)
+            Notification.objects.create(creator=user, to=image.creator, image=image,
+                                        notificaiton_type=Notification.NotificationType.LIKE)
             return Response(status=status.HTTP_201_CREATED)
 
 
 class UnLikeImage(APIView):
 
-    def delete(self, request, image_id, format=None):
+    def delete(self, request, image_id):
         user = request.user
         image = get_object_or_404(Image, id=image_id)
 
@@ -124,16 +121,16 @@ class UnLikeImage(APIView):
 
 class CommentOnImage(APIView):
 
-    def post(self, request, image_id, format=None):
+    def post(self, request, image_id):
         user = request.user
         image = get_object_or_404(Image, id=image_id)
 
-        serializer = CommentSerializer(data=request.data)
+        serializer = CommentSerializer(data=request.POST)
 
         if serializer.is_valid():
             comment = serializer.save(creator=user, image=image)  # NOTE: serializer.save() 는 모델 인스턴스를 리턴
-            Notification.objects.create(creator=user, to=image.creator, notificaiton_type='comment', image=image,
-                                        comment=comment)
+            Notification.objects.create(creator=user, to=image.creator, image=image, comment=comment,
+                                        notificaiton_type=Notification.NotificationType.COMMENT)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -141,7 +138,7 @@ class CommentOnImage(APIView):
 
 class CommentView(APIView):
 
-    def delete(self, request, comment_id, format=None):
+    def delete(self, request, comment_id):
         user = request.user
         comment = get_object_or_404(Comment, id=comment_id, creator=user)
         comment.delete()
@@ -158,7 +155,7 @@ class ModerateComments(APIView):
 
 class Search(APIView):
 
-    def get(self, request, format=None):
+    def get(self, request):
         tags = request.query_params.get('tags', None)  # NOTE: query_params 를 통해서 query string을 가져온다.
         if tags:
             tags = tags.split(',')
