@@ -63,3 +63,17 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # Your local stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
+
+# MIDDLEWARE CONFIGURATION FOR LOCAL
+# ------------------------------------------------------------------------------
+MIDDLEWARE = [
+    'silk.middleware.SilkyMiddleware',
+] + MIDDLEWARE
+
+# APP CONFIGURATION FOR LOCAL
+# ------------------------------------------------------------------------------
+INSTALLED_APPS += [
+    'silk',
+]
+
+SILKY_PYTHON_PROFILER = True

@@ -13,6 +13,6 @@ class ReactAppView(View):
                 return HttpResponse(file.read())
         except:
             return HttpResponse(
-                """index.thml not found! build your React app !!""",
+                """index.html not found! build your React app !!""",
                 status=501
             )

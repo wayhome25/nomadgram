@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from silk.profiling.profiler import silk_profile
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -19,6 +20,7 @@ from nomadgram.users.serializer import ListUserSerializer
 
 class Images(APIView):
 
+    @silk_profile(name='View Image List')
     def get(self, request, format=None):
         user = request.user
         following_users = user.following.all()
@@ -46,12 +48,14 @@ class ImageDetail(APIView):
         except Image.DoesNotExist:
             return None
 
+    @silk_profile(name='View Image List')
     def get(self, request, image_id, format=None):
         image = get_object_or_404(Image, id=image_id)
         serializer = ImageSerializer(image)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
+    @silk_profile(name='View Image List')
     def put(self, request, image_id, format=None):
         user = request.user
         image = self.find_own_image(image_id, user)
@@ -78,6 +82,7 @@ class ImageDetail(APIView):
 
 class LikeImage(APIView):
 
+    @silk_profile(name='View Image List')
     def get(self, request, image_id, format=None):
         """like 유저 리스트를 가져온다"""
         likes = Like.objects.filter(image_id=image_id)
