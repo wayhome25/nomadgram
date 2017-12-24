@@ -12,8 +12,8 @@ from nomadgram.users.serializer import ListUserSerializer
 from nomadgram.users.serializer import UserProfileSerializer
 
 
-class ExploreUsers(APIView):
-
+class ExploreUsersView(APIView):
+    """최근 가입한 유저 리스트를 리턴한다."""
     def get(self, request):
         users = User.objects.all().order_by('-date_joined')[:5]
         serializer = ListUserSerializer(users, many=True)

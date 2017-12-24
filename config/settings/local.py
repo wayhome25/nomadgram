@@ -66,9 +66,9 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # MIDDLEWARE CONFIGURATION FOR LOCAL
 # ------------------------------------------------------------------------------
-MIDDLEWARE = [
+MIDDLEWARE += [
     'silk.middleware.SilkyMiddleware',
-] + MIDDLEWARE
+]
 
 # APP CONFIGURATION FOR LOCAL
 # ------------------------------------------------------------------------------
