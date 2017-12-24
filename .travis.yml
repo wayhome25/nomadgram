@@ -1,0 +1,16 @@
+language: python
+python:
+  - 3.6
+install:
+  - pip install -r requirements/local.txt
+before_script:
+# PEP8
+  - flake8 --exclude=migrations,settings.py,manage.py --max-line-length=120
+
+# migration test
+  - python3 manage.py migrate --noinput
+script:
+  - python manage.py test
+  - coverage run manage.py test
+after_success:
+  - codecov
