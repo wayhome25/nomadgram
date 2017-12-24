@@ -5,7 +5,7 @@ install:
   - pip install -r requirements/local.txt
 before_script:
 # PEP8
-  - flake8 --exclude=migrations,settings.py,manage.py --max-line-length=120
+  - flake8 --exclude=migrations,settings.py,manage.py,frontend/,config/ --max-line-length=120
 
 # migration test
   - python3 manage.py migrate --noinput
