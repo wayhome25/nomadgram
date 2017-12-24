@@ -8,6 +8,7 @@ before_script:
   - flake8 --exclude=migrations,settings.py,manage.py,frontend/,config/ --max-line-length=120
 
 # migration test
+  - psql -c 'CREATE DATABASE nomadgram;' -U postgres
   - python3 manage.py migrate --noinput
 script:
   - python manage.py test
