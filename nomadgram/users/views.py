@@ -1,24 +1,23 @@
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from rest_auth.registration.views import SocialLoginView
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django.shortcuts import get_object_or_404
 
+from nomadgram import permissions
 from nomadgram.notifications.models import Notification
 from nomadgram.users.models import User
 from nomadgram.users.serializer import ListUserSerializer
 from nomadgram.users.serializer import UserProfileSerializer
 
 
-class ExploreUsersView(APIView):
+class ExploreUsersView(generics.ListAPIView):
     """최근 가입한 유저 리스트를 리턴한다."""
-    def get(self, request):
-        users = User.objects.all().order_by('-date_joined')[:5]
-        serializer = ListUserSerializer(users, many=True)
-
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    queryset = User.objects.all().order_by('-date_joined')[:5]
+    serializer_class = ListUserSerializer
 
 
 class FollowUser(APIView):
@@ -44,26 +43,11 @@ class UnFollowUser(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class UserProfile(APIView):
-
-    def get(self, request, username):
-        query = get_object_or_404(User.objects.prefetch_related('images__comments', 'images__likes'), username=username)
-        serializer = UserProfileSerializer(query)
-
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-    def put(self, request, username):
-        try:
-            user = User.objects.get(id=request.user.id, username=username)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        else:
-            serializer = UserProfileSerializer(user, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(data=serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(data=serializer.errors, status=status.HTTP_304_NOT_MODIFIED)
+class UserProfile(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all().prefetch_related('images__comments', 'images__likes', 'followers', 'following')
+    serializer_class = UserProfileSerializer
+    lookup_field = 'username'
+    permission_classes = (permissions.IsOwnerOrReadOnly,)
 
 
 class UserFollowers(APIView):
@@ -84,16 +68,27 @@ class UserFollowing(APIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class Search(APIView):
+# class Search(APIView):
+#
+#     def get(self, request):
+#         username = request.query_params.get('username', None)
+#         if username:
+#             found_users = User.objects.filter(username__istartswith=username)
+#             serializer = ListUserSerializer(found_users, many=True)
+#             return Response(data=serializer.data, status=status.HTTP_200_OK)
+#         else:
+#             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request):
-        username = request.query_params.get('username', None)
+
+class Search(generics.ListAPIView):
+    serializer_class = ListUserSerializer
+
+    def get_queryset(self):
+        queryset = User.objects.none()
+        username = self.request.query_params.get('username', None)
         if username:
-            found_users = User.objects.filter(username__istartswith=username)
-            serializer = ListUserSerializer(found_users, many=True)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            queryset = User.objects.filter(username__istartswith=username)
+        return queryset
 
 
 class ChangePassword(APIView):
